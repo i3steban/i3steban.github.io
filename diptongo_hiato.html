@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>El juego de las vocales</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #203b42;
+      --muted: #587276;
+      --teal: #087c72;
+      --teal-dark: #075e57;
+      --coral: #ef745f;
+      --yellow: #ffd35b;
+      --border: #c9ded8;
+      --paper: #f7fbf8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#d5eae1 1px, transparent 1px);
+      background-size: 24px 24px;
+      font-family: "Trebuchet MS", Verdana, sans-serif;
+    }
+
+    button, textarea, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid #2853a4;
+      outline-offset: 3px;
+    }
+
+    .app {
+      width: min(100% - 32px, 920px);
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      flex: 0 0 56px;
+      height: 56px;
+      border-radius: 12px;
+      background: var(--yellow);
+      color: var(--ink);
+      font-size: 24px;
+      font-weight: 900;
+      transform: rotate(-6deg);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 250px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .game,
+    .scoreboard {
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .game {
+      padding: 28px;
+      box-shadow: 0 6px 0 #deede5;
+    }
+
+    .section-label {
+      margin: 0;
+      color: var(--teal-dark);
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .word-area {
+      display: grid;
+      place-items: center;
+      min-height: 150px;
+      margin: 16px 0 24px;
+      padding: 24px 16px;
+      border: 2px dashed #b6dcd0;
+      border-radius: 8px;
+      background: #effaf4;
+      text-align: center;
+    }
+
+    .word {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1.15;
+    }
+
+    fieldset {
+      min-width: 0;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+
+    legend {
+      margin-bottom: 12px;
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .choice {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 66px;
+      padding: 12px 15px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .choice:has(input:checked) {
+      border-color: var(--teal);
+      background: #e2f6ec;
+    }
+
+    .choice input {
+      flex: 0 0 24px;
+      width: 24px;
+      height: 24px;
+      margin: 0;
+      accent-color: var(--teal);
+    }
+
+    .feedback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 56px;
+      margin: 18px 0 12px;
+      padding: 10px;
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .feedback.correct {
+      background: #dff5e7;
+      color: #17683c;
+    }
+
+    .feedback.incorrect {
+      background: #fff0e8;
+      color: #994629;
+    }
+
+    .detail-label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .detail {
+      display: block;
+      width: 100%;
+      min-height: 76px;
+      padding: 12px;
+      resize: vertical;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: #f8fbf9;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    .action {
+      width: 100%;
+      min-height: 58px;
+      margin-top: 18px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--teal);
+      box-shadow: 0 4px 0 var(--teal-dark);
+      color: #fff;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .action:hover {
+      background: var(--teal-dark);
+    }
+
+    .action:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 var(--teal-dark);
+    }
+
+    .scoreboard {
+      padding: 22px;
+    }
+
+    .scoreboard h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 0;
+      border-top: 2px solid #edf4ef;
+      font-weight: 800;
+    }
+
+    .stat-name {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .stat-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .success-icon {
+      background: #dff5e7;
+      color: #207d48;
+    }
+
+    .error-icon {
+      background: #ffebe5;
+      color: #bd4d38;
+    }
+
+    .streak-icon {
+      background: #fff2c9;
+      color: #a66a00;
+    }
+
+    .stat-value {
+      font-size: 24px;
+    }
+
+    .reset {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .reset:hover {
+      border-color: var(--teal);
+      color: var(--teal-dark);
+    }
+
+    @media (max-width: 650px) {
+      .app {
+        padding-top: 20px;
+      }
+
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .game,
+      .scoreboard {
+        padding: 20px;
+      }
+
+      .word {
+        font-size: 34px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .choices {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <div class="logo" aria-hidden="true">Aa</div>
+      <div>
+        <h1>El juego de las vocales</h1>
+        <p class="subtitle">Diptongos y hiatos</p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="game" aria-labelledby="word-label">
+        <h2 class="section-label" id="word-label">Tu palabra</h2>
+        <div class="word-area">
+          <div class="word" id="word" aria-live="polite"></div>
+        </div>
+
+        <form id="game-form">
+          <fieldset id="choices">
+            <legend>¿Qué contiene?</legend>
+            <div class="choices">
+              <label class="choice">
+                <input type="checkbox" id="diphthong">
+                <span>Diptongo</span>
+              </label>
+              <label class="choice">
+                <input type="checkbox" id="hiatus">
+                <span>Hiato</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+
+          <label class="detail-label" for="detail">Detalle</label>
+          <textarea
+            class="detail"
+            id="detail"
+            rows="2"
+            readonly
+            placeholder="Aquí aparecerá el detalle."
+          ></textarea>
+
+          <button class="action" id="action" type="submit">Comprobar</button>
+        </form>
+      </section>
+
+      <aside class="scoreboard" aria-labelledby="score-title">
+        <h2 id="score-title">Tu marcador</h2>
+
+        <div class="stat">
+          <span class="stat-name">
+            <span class="stat-icon success-icon" aria-hidden="true">✓</span>
+            Aciertos
+          </span>
+          <span class="stat-value" id="correct-count">0</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-name">
+            <span class="stat-icon error-icon" aria-hidden="true">×</span>
+            Errores
+          </span>
+          <span class="stat-value" id="error-count">0</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-name">
+            <span class="stat-icon streak-icon" aria-hidden="true">★</span>
+            Racha
+          </span>
+          <span class="stat-value" id="streak-count">0</span>
+        </div>
+
+        <button class="reset" id="reset" type="button">Reiniciar marcador</button>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const datos = [
+        { "palabra": "ciudad", "diptongo": true, "hiato": false, "detalle": "ciu-dad / Diptongo u+i" },
+        { "palabra": "causa", "diptongo": true, "hiato": false, "detalle": "cau-sa / Diptongo a+u" },
+        { "palabra": "peine", "diptongo": true, "hiato": false, "detalle": "pei-ne / Diptongo e+i" },
+        { "palabra": "ruido", "diptongo": true, "hiato": false, "detalle": "rui-do / Diptongo u+i" },
+        { "palabra": "aire", "diptongo": true, "hiato": false, "detalle": "ai-re / Diptongo a+i" },
+        { "palabra": "cuidado", "diptongo": true, "hiato": false, "detalle": "cui-da-do / Diptongo u+i" },
+        { "palabra": "aceite", "diptongo": true, "hiato": false, "detalle": "a-cei-te / Diptongo e+i" },
+        { "palabra": "jaula", "diptongo": true, "hiato": false, "detalle": "jau-la / Diptongo a+u" },
+        { "palabra": "miedo", "diptongo": true, "hiato": false, "detalle": "mie-do / Diptongo i+e" },
+        { "palabra": "fuego", "diptongo": true, "hiato": false, "detalle": "fue-go / Diptongo u+e" },
+        { "palabra": "buey", "diptongo": true, "hiato": false, "detalle": "buey / Diptongo u+e" },
+        { "palabra": "bailarina", "diptongo": true, "hiato": false, "detalle": "bai-la-ri-na / Diptongo a+i" },
+        { "palabra": "ciudadano", "diptongo": true, "hiato": false, "detalle": "ciu-da-da-no / Diptongo i+u" },
+        { "palabra": "televisión", "diptongo": true, "hiato": false, "detalle": "te-le-vi-sión / Diptongo i+ó" },
+        { "palabra": "huir", "diptongo": true, "hiato": false, "detalle": "huir / Diptongo u+i" },
+        { "palabra": "paisaje", "diptongo": true, "hiato": false, "detalle": "pai-sa-je / Diptongo a+i" },
+        { "palabra": "aceituna", "diptongo": true, "hiato": false, "detalle": "a-cei-tu-na / Diptongo e+i" },
+        { "palabra": "reino", "diptongo": true, "hiato": false, "detalle": "rei-no / Diptongo e+i" },
+        { "palabra": "fuente", "diptongo": true, "hiato": false, "detalle": "fuen-te / Diptongo u+e" },
+        { "palabra": "sueño", "diptongo": true, "hiato": false, "detalle": "sue-ño / Diptongo u+e" },
+        { "palabra": "viuda", "diptongo": true, "hiato": false, "detalle": "viu-da / Diptongo i+u" },
+        { "palabra": "aumentar", "diptongo": true, "hiato": false, "detalle": "au-men-tar / Diptongo a+u" },
+        { "palabra": "viaje", "diptongo": true, "hiato": false, "detalle": "via-je / Diptongo i+a" },
+        { "palabra": "baile", "diptongo": true, "hiato": false, "detalle": "bai-le / Diptongo a+i" },
+        { "palabra": "caimán", "diptongo": true, "hiato": false, "detalle": "cai-mán / Diptongo a+i" },
+        { "palabra": "pausa", "diptongo": true, "hiato": false, "detalle": "pau-sa / Diptongo a+u" },
+        { "palabra": "reina", "diptongo": true, "hiato": false, "detalle": "rei-na / Diptongo e+i" },
+        { "palabra": "seis", "diptongo": true, "hiato": false, "detalle": "seis / Diptongo e+i" },
+        { "palabra": "boina", "diptongo": true, "hiato": false, "detalle": "boi-na / Diptongo o+i" },
+        { "palabra": "diurno", "diptongo": true, "hiato": false, "detalle": "diur-no / Diptongo i+u" },
+        { "palabra": "cuerpo", "diptongo": true, "hiato": false, "detalle": "cuer-po / Diptongo u+e" },
+        { "palabra": "puerta", "diptongo": true, "hiato": false, "detalle": "puer-ta / Diptongo u+e" },
+        { "palabra": "fiesta", "diptongo": true, "hiato": false, "detalle": "fies-ta / Diptongo i+e" },
+        { "palabra": "tierra", "diptongo": true, "hiato": false, "detalle": "tie-rra / Diptongo i+e" },
+        { "palabra": "nueve", "diptongo": true, "hiato": false, "detalle": "nue-ve / Diptongo u+e" },
+        { "palabra": "abuelo", "diptongo": true, "hiato": false, "detalle": "a-bue-lo / Diptongo u+e" },
+        { "palabra": "jueves", "diptongo": true, "hiato": false, "detalle": "jue-ves / Diptongo u+e" },
+        { "palabra": "cielo", "diptongo": true, "hiato": false, "detalle": "cie-lo / Diptongo i+e" },
+        { "palabra": "pieza", "diptongo": true, "hiato": false, "detalle": "pie-za / Diptongo i+e" },
+        { "palabra": "aeronave", "diptongo": false, "hiato": true, "detalle": "a-e-ro-na-ve / Hiato a+e" },
+        { "palabra": "león", "diptongo": false, "hiato": true, "detalle": "le-ón / Hiato e+o" },
+        { "palabra": "poeta", "diptongo": false, "hiato": true, "detalle": "po-e-ta / Hiato o+e" },
+        { "palabra": "baúl", "diptongo": false, "hiato": true, "detalle": "ba-úl / Hiato a+ú (cerrada con tilde)" },
+        { "palabra": "raíz", "diptongo": false, "hiato": true, "detalle": "ra-íz / Hiato a+í (cerrada con tilde)" },
+        { "palabra": "día", "diptongo": false, "hiato": true, "detalle": "dí-a / Hiato í+a (cerrada con tilde)" },
+        { "palabra": "océano", "diptongo": false, "hiato": true, "detalle": "o-cé-a-no / Hiato e+a" },
+        { "palabra": "teatro", "diptongo": false, "hiato": true, "detalle": "te-a-tro / Hiato e+a" },
+        { "palabra": "caer", "diptongo": false, "hiato": true, "detalle": "ca-er / Hiato a+e" },
+        { "palabra": "héroe", "diptongo": false, "hiato": true, "detalle": "hé-ro-e / Hiato o+e" },
+        { "palabra": "río", "diptongo": false, "hiato": true, "detalle": "rí-o / Hiato í+o" },
+        { "palabra": "maíz", "diptongo": false, "hiato": true, "detalle": "ma-íz / Hiato a+í" },
+        { "palabra": "país", "diptongo": false, "hiato": true, "detalle": "pa-ís / Hiato a+í" },
+        { "palabra": "oído", "diptongo": false, "hiato": true, "detalle": "o-í-do / Hiato o+í" },
+        { "palabra": "cooperar", "diptongo": false, "hiato": true, "detalle": "co-o-pe-rar / Hiato o+o (dos abiertas)" },
+        { "palabra": "caótico", "diptongo": false, "hiato": true, "detalle": "ca-ó-ti-co / Hiato a+ó" },
+        { "palabra": "reír", "diptongo": false, "hiato": true, "detalle": "re-ír / Hiato e+í (cerrada con tilde)" },
+        { "palabra": "búho", "diptongo": false, "hiato": true, "detalle": "bú-ho / Hiato ú+o (cerrada con tilde + abierta)" },
+        { "palabra": "tarea", "diptongo": false, "hiato": true, "detalle": "ta-re-a / Hiato e+a" },
+        { "palabra": "lío", "diptongo": false, "hiato": true, "detalle": "lí-o / Hiato í+o" },
+        { "palabra": "grúa", "diptongo": false, "hiato": true, "detalle": "grú-a / Hiato ú+a" },
+        { "palabra": "pelear", "diptongo": false, "hiato": true, "detalle": "pe-le-ar / Hiato e+a" },
+        { "palabra": "sonreír", "diptongo": false, "hiato": true, "detalle": "son-re-ír / Hiato e+í" },
+        { "palabra": "poema", "diptongo": false, "hiato": true, "detalle": "po-e-ma / Hiato o+e" },
+        { "palabra": "toalla", "diptongo": false, "hiato": true, "detalle": "to-a-lla / Hiato o+a" },
+        { "palabra": "zoo", "diptongo": false, "hiato": true, "detalle": "zo-o / Hiato o+o" },
+        { "palabra": "microondas", "diptongo": false, "hiato": true, "detalle": "mi-cro-on-das / Hiato o+o" },
+        { "palabra": "rehén", "diptongo": false, "hiato": true, "detalle": "re-hén / Hiato e+é" },
+        { "palabra": "aeropuerto", "diptongo": true, "hiato": true, "detalle": "a-e-ro-puer-to / Hiato a-e + diptongo ue" },
+        { "palabra": "aviación", "diptongo": true, "hiato": true, "detalle": "a-vi-a-ción / Hiato i+a + diptongo ió" },
+        { "palabra": "reunión", "diptongo": true, "hiato": true, "detalle": "re-u-nión / Hiato e+u + diptongo ió" }
+      ];
+
+      const word = document.getElementById("word");
+      const diphthong = document.getElementById("diphthong");
+      const hiatus = document.getElementById("hiatus");
+      const choices = document.getElementById("choices");
+      const feedback = document.getElementById("feedback");
+      const detail = document.getElementById("detail");
+      const action = document.getElementById("action");
+      const correctCount = document.getElementById("correct-count");
+      const errorCount = document.getElementById("error-count");
+      const streakCount = document.getElementById("streak-count");
+
+      let remaining = [];
+      let current = null;
+      let answered = false;
+      let correct = 0;
+      let errors = 0;
+      let streak = 0;
+
+      function nextWord() {
+        if (remaining.length === 0) {
+          remaining = [...datos];
+        }
+
+        let index = Math.floor(Math.random() * remaining.length);
+        if (remaining.length > 1 && remaining[index] === current) {
+          index = (index + 1) % remaining.length;
+        }
+
+        current = remaining.splice(index, 1)[0];
+        word.textContent = current.palabra;
+        diphthong.checked = false;
+        hiatus.checked = false;
+        choices.disabled = false;
+        detail.value = "";
+        feedback.textContent = "";
+        feedback.className = "feedback";
+        action.textContent = "Comprobar";
+        answered = false;
+      }
+
+      function updateScore() {
+        correctCount.textContent = correct;
+        errorCount.textContent = errors;
+        streakCount.textContent = streak;
+      }
+
+      document.getElementById("game-form").addEventListener("submit", event => {
+        event.preventDefault();
+
+        if (answered) {
+          nextWord();
+          diphthong.focus();
+          return;
+        }
+
+        const isCorrect =
+          diphthong.checked === current.diptongo &&
+          hiatus.checked === current.hiato;
+
+        if (isCorrect) {
+          correct += 1;
+          streak += 1;
+          feedback.textContent = streak >= 3
+            ? `¡Genial! Llevas ${streak} aciertos seguidos. ★`
+            : "¡Muy bien! ¡Respuesta correcta! ★";
+          feedback.className = "feedback correct";
+        } else {
+          errors += 1;
+          streak = 0;
+          feedback.textContent = "¡Sigue practicando! Mira el detalle.";
+          feedback.className = "feedback incorrect";
+        }
+
+        detail.value = current.detalle;
+        choices.disabled = true;
+        answered = true;
+        action.textContent = "Siguiente palabra";
+        updateScore();
+        action.focus();
+      });
+
+      document.getElementById("reset").addEventListener("click", () => {
+        correct = 0;
+        errors = 0;
+        streak = 0;
+        updateScore();
+        nextWord();
+        feedback.textContent = "Marcador reiniciado.";
+      });
+
+      nextWord();
+    })();
+  </script>
+</body>
+</html>
