@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Verbos - ejercicio secuencial</title>
+  <style>
+    :root{
+      --surface: #ffffff;
+      --muted: #556070;
+      --border: #dbe7fb;
+      --accent: #2b6cb0;
+      --green-soft: #dff7e6;
+      --red-soft: #ffe6e6;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: #f5f8fc;
+      color: #0f1724;
+      margin: 24px;
+    }
+
+    .card {
+      max-width: 980px;
+      background: var(--surface);
+      padding: 18px;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(18,38,63,0.06);
+    }
+
+    h1 {
+      margin: 0 0 8px 0;
+      font-size: 1.25rem;
+    }
+
+    p.lead {
+      margin: 0 0 12px 0;
+      color: var(--muted);
+      font-size:0.95rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 2px solid var(--border);
+      background: linear-gradient(0deg, rgba(0,0,0,0.02), transparent);
+      font-weight: 700;
+    }
+
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    input.cell-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #cfe0f6;
+    }
+
+    input.cell-input:focus {
+      box-shadow: 0 0 0 3px rgba(43,108,176,0.12);
+      outline: none;
+    }
+
+    .controls {
+      margin-top: 14px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+
+    button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #cfe0f6;
+      background: white;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: white;
+      border-color: rgba(0,0,0,0.06);
+    }
+
+    button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .counters {
+      margin-left: auto;
+      display:flex;
+      gap:12px;
+      font-size:0.95rem;
+      color: var(--muted);
+      align-items:center;
+    }
+
+    .counter {
+      background: #fbfdff;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid #eef6ff;
+      min-width: 110px;
+      text-align: center;
+    }
+
+    .match { background: var(--green-soft); }
+    .mismatch { background: var(--red-soft); }
+
+    .real-cell {
+      font-weight: 600;
+      background: linear-gradient(0deg, rgba(0,0,0,0.02), transparent);
+    }
+
+    .status {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width:760px){
+      .counters { display:block; margin-left:0; margin-top:8px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" role="region" aria-label="Tabla de verbos">
+    <h1>Verbos: ejercicio secuencial</h1>
+    <p class="lead">Pulsa <strong>Solución</strong> para comprobar.</p>
+
+    <table id="verbsTable" aria-describedby="tableDesc">
+      <caption id="tableDesc" style="text-align:left; caption-side: bottom; padding-top:8px; font-size:0.9rem; color:var(--muted);">
+        Datos: array JSON. Se recorren todas las filas en orden aleatorio.
+      </caption>
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+
+    <div class="controls" aria-hidden="false">
+      <button id="resolveBtn" class="primary">Solución</button>
+      <button id="resetBtn">Next</button>
+
+      <div class="counters" aria-live="polite" id="counters">
+        <div class="counter" id="resolveCount">Número de intentos: 0</div>
+        <div class="counter" id="correctCount">Aciertos: 0</div>
+        <div class="counter" id="wrongCount">Fallos: 0</div>
+        <div class="counter" id="percentCount">Porcentaje: 0%</div>
+      </div>
+    </div>
+
+    <div class="status" id="statusText" aria-live="polite"></div>
+  </div>
+
+  <script>
+    // --- Datos de origen (JSON Array) ---
+    var data = [
+      ["VERB","PAST SIMPLE","PAST PARTICIPLE","SPANISH"],
+      ["be","was - were","been","ser/estar"],
+      ["beat","beat","beaten","vencer"],
+      ["become","became","become","llegar a ser"],
+      ["begin","began","begun","empezar"],
+      ["break","broke","broken","romper"],
+      ["bring","brought","brought","traer"],
+      ["build","built","built","construir"],
+      ["burn","burnt - burned","burnt - burned","quemar"],
+      ["buy","bought","bought","comprar"],
+      ["catch","caught","caught","coger"],
+      ["choose","chose","chosen","elegir"],
+      ["come","came","come","venir"],
+      ["cost","cost","cost","costar"],
+      ["cut","cut","cut","cortar"],
+      ["do","did","done","hacer"],
+      ["draw","drew","drawn","dibujar"],
+      ["dream","dreamt - dreamed","dreamt - dreamed","soñar"],
+      ["drink","drank","drunk","beber"],
+      ["drive","drove","driven","conducir"],
+      ["eat","ate","eaten","comer"],
+      ["fall","fell","fallen","caer"],
+      ["feel","felt","felt","sentir"],
+      ["find","found","found","encontrar"],
+      ["fly","flew","flown","volar"],
+      ["forget","forgot","forgotten","olvidar"],
+      ["forgive","forgave","forgiven","perdonar"],
+      ["get","got","got","obtener"],
+      ["give","gave","given","dar"],
+      ["go","went","gone","ir"],
+      ["grow","grew","grown","crecer"],
+      ["hang out","hung out","hung out","pasar el rato"],
+      ["have","had","had","tener"],
+      ["hear","heard","heard","oir"],
+      ["hide","hid","hidden","esconder"],
+      ["hit","hit","hit","golpear"],
+      ["hurt","hurt","hurt","herir"],
+      ["keep","kept","kept","mantener"],
+      ["know","knew","known","saber"],
+      ["lay","laid","laid","colocar"],
+      ["learn","learnt - learned","learnt - learned","aprender"],
+      // ["leave","left","left","dejar/salir"],
+      // ["let","let","let","dejar"],
+      // ["lie","lay","lain","tumbar"],
+      // ["lose","lost","lost","perder"],
+      // ["make","made","made","hacer"],
+      // ["mean","meant","meant","significar"],
+      // ["meet","met","met","quedar"],
+      // ["pay","paid","paid","pagar"],
+      // ["put","put","put","poner"],
+      // ["read","read","read","leer"],
+      // ["ride","rode","ridden","montar"],
+      // ["run","ran","run","correr"],
+      // ["say","said","said","decir"],
+      // ["see","saw","seen","ver"],
+      // ["sell","sold","sold","vender"],
+      // ["send","sent","sent","enviar"],
+      // ["show","showed","shown","mostrar"],
+      // ["shut","shut","shut","cerrar"],
+      // ["sing","sang","sung","cantar"],
+      // ["sit","sat","sat","sentar"],
+      // ["sleep","slept","slept","dormir"],
+      // ["speak","spoke","spoken","hablar"],
+      // ["spell","spelt - spelled","spelt - spelled","deletrear"],
+      // ["spend","spent","spent","gastar"],
+      // ["stand","stood","stood","estar de pie"],
+      // ["steal","stole","stolen","robar"],
+      // ["swim","swam","swum","nadar"],
+      // ["swing","swung","swung","columpiar"],
+      // ["take","took","taken","coger"],
+      // ["teach","taught","taught","enseñar"],
+      // ["tell","told","told","contar"],
+      // ["think","thought","thought","pensar"],
+      // ["throw","threw","thrown","lanzar"],
+      // ["understand","understood","understood","entender"],
+      // ["wake","woke","woken","despertar"],
+      // ["wear","wore","worn","levar puesto"],
+      // ["win","won","won","ganar"],
+      // ["write","wrote","written","escribir"]
+    ];
+
+    // --- Referencias DOM ---
+    var tableHead = document.getElementById('tableHead');
+    var tableBody = document.getElementById('tableBody');
+    var resetBtn = document.getElementById('resetBtn'); // Next
+    var resolveBtn = document.getElementById('resolveBtn');
+    var statusText = document.getElementById('statusText');
+
+    var resolveCountEl = document.getElementById('resolveCount'); // "Número de intentos"
+    var correctCountEl = document.getElementById('correctCount');
+    var wrongCountEl = document.getElementById('wrongCount');
+    var percentCountEl = document.getElementById('percentCount');
+
+    // --- Estado para recorrido secuencial ---
+    var shuffledOrder = []; // indices of data rows to use (values 1..data.length-1)
+    var currentPointer = 0; // position in shuffledOrder (0 .. totalRows-1)
+    var totalRows = Math.max(0, data.length - 1);
+
+    // Estado actual seleccionado (index into data, not pointer)
+    var selectedRowIndex = null; // actual data index (>=1)
+    var selectedColIndex = null;
+
+    // Contadores acumulativos
+    var resolveCount = 0;
+    var correctCount = 0;
+    var wrongCount = 0;
+
+    // Timer for Next disabling
+    var nextTimer = null;
+    var nextRemaining = 0;
+
+    // ---------------- utilities ----------------
+    function shuffleArray(arr) {
+      // Fisher-Yates
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    function normalize(txt){
+      return String(txt === null || txt === undefined ? '' : txt)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, '');
+    }
+
+    // ---------------- UI counters ----------------
+    function updateCountersUI(){
+      resolveCountEl.textContent = 'Número de intentos: ' + resolveCount;
+      correctCountEl.textContent = 'Aciertos: ' + correctCount;
+      wrongCountEl.textContent = 'Fallos: ' + wrongCount;
+      var totalCompared = correctCount + wrongCount;
+      var pct = totalCompared > 0 ? (correctCount / totalCompared) * 100 : 0;
+      percentCountEl.textContent = 'Porcentaje: ' + pct.toFixed(1) + '%';
+    }
+
+    // ---------------- header & build ----------------
+    function buildHeader(){
+      tableHead.innerHTML = '';
+      var tr = document.createElement('tr');
+      var headers = data[0] || [];
+      for (var i = 0; i < headers.length; i++) {
+        var th = document.createElement('th');
+        th.scope = "col";
+        th.textContent = headers[i];
+        tr.appendChild(th);
+      }
+      tableHead.appendChild(tr);
+    }
+
+    // Build partial second row using shuffledOrder[currentPointer]
+    function buildPartialSecondRow(){
+      tableBody.innerHTML = '';
+
+      // If we've exhausted rows, finalize
+      if (currentPointer >= totalRows) {
+        finalizeAll();
+        return;
+      }
+
+      selectedRowIndex = shuffledOrder[currentPointer];
+      var rowData = data[selectedRowIndex];
+      selectedColIndex = Math.floor(Math.random() * rowData.length);
+
+      var tr2 = document.createElement('tr');
+      tr2.setAttribute('id','row2');
+
+      for (var c = 0; c < rowData.length; c++) {
+        var td = document.createElement('td');
+
+        if (c === selectedColIndex) {
+          td.textContent = rowData[c];
+          td.classList.add('real-cell');
+          td.setAttribute('aria-label','Valor mostrado: ' + rowData[c]);
+        } else {
+          var input = document.createElement('input');
+          input.type = 'text';
+          input.className = 'cell-input';
+          input.setAttribute('data-col', c);
+          input.setAttribute('aria-label', 'Introduce valor para ' + (data[0][c] || ('col ' + c)));
+          input.value = '';
+
+          // Enter behavior: si hay texto en todos los inputs, acciona Solución
+          input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              if (allInputsFilled()) {
+                // Llamamos a la misma función que el botón Solución
+                resolveAndShowAnswer();
+              }
+            }
+          });
+
+          td.appendChild(input);
+        }
+
+        tr2.appendChild(td);
+      }
+
+      tableBody.appendChild(tr2);
+
+      // Status: mostrar progreso
+      statusText.textContent = 'Ejercicio ' + (currentPointer + 1) + ' de ' + totalRows + '. (Fila índice ' + selectedRowIndex + ')';
+    }
+
+    // Comprueba si todos los inputs en row2 están llenos (no solo espacios)
+    function allInputsFilled(){
+      var inputs = document.querySelectorAll('#row2 input.cell-input');
+      if (!inputs || inputs.length === 0) return false;
+      for (var i = 0; i < inputs.length; i++) {
+        if (normalize(inputs[i].value) === '') return false;
+      }
+      return true;
+    }
+
+    // ---------------- Solve / Resolve ----------------
+    function disableSolutionInputs(){
+      var inputs = document.querySelectorAll('#row2 input.cell-input');
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].disabled = true;
+      }
+    }
+
+    function disableSolutionButton(){
+      resolveBtn.disabled = true;
+    }
+
+    function enableSolutionButton(){
+      resolveBtn.disabled = false;
+    }
+
+    function enableNextImmediately(){
+      // Solo habilitar si quedan filas por usar
+      if (currentPointer < totalRows - 1) {
+        // cancel any timer
+        if (nextTimer) {
+          clearInterval(nextTimer);
+          nextTimer = null;
+        }
+        resetBtn.disabled = false;
+        resetBtn.textContent = 'Next';
+      } else {
+        // no quedan más filas: finalizar directamente
+        // we don't enable Next because there's nothing left to go to
+        finalizeAll();
+      }
+    }
+
+    function resolveAndShowAnswer(){
+      if (selectedRowIndex === null || selectedColIndex === null){
+        alert('Pulsa Next para generar una fila antes de pulsar Solución.');
+        return;
+      }
+
+      // Incrementar número de intentos
+      resolveCount += 1;
+      updateCountersUI();
+
+      // Si ya existe fila3, eliminarla (reemplazamos)
+      var existingRow3 = document.getElementById('row3');
+      if (existingRow3) existingRow3.remove();
+
+      var solutionRow = data[selectedRowIndex];
+      var tr3 = document.createElement('tr');
+      tr3.setAttribute('id','row3');
+
+      var correctThisResolve = 0;
+      var wrongThisResolve = 0;
+
+      for (var c = 0; c < solutionRow.length; c++){
+        var td = document.createElement('td');
+        td.textContent = solutionRow[c];
+
+        if (c !== selectedColIndex) {
+          var input = document.querySelector('#row2 input[data-col="' + c + '"]');
+          var userText = input ? input.value : '';
+          var realText = solutionRow[c];
+
+          if (normalize(userText) === normalize(realText)) {
+            td.classList.add('match');
+            correctThisResolve += 1;
+          } else {
+            td.classList.add('mismatch');
+            wrongThisResolve += 1;
+          }
+        } else {
+          td.setAttribute('aria-label', 'Valor real (ya mostrado en fila 2)');
+        }
+
+        tr3.appendChild(td);
+      }
+
+      tableBody.appendChild(tr3);
+
+      // Actualizar contadores acumulativos
+      correctCount += correctThisResolve;
+      wrongCount += wrongThisResolve;
+      updateCountersUI();
+
+      // Bloquear inputs y botón Solución
+      disableSolutionInputs();
+      disableSolutionButton();
+
+      // Si hay más filas por usar, habilitar Next inmediatamente.
+      // Si no hay más filas, finalizar (bloquear todo).
+      if (currentPointer < totalRows - 1) {
+        enableNextImmediately();
+      } else {
+        // última fila resuelta -> finalizar
+        finalizeAll();
+      }
+    }
+
+    // ---------------- Next / timer ----------------
+    function disableNextForSeconds(seconds){
+      if (nextTimer) {
+        clearInterval(nextTimer);
+        nextTimer = null;
+      }
+
+      // If no more rows, keep Next disabled permanently
+      if (currentPointer >= totalRows - 1) {
+        resetBtn.disabled = true;
+        resetBtn.textContent = 'Next';
+        return;
+      }
+
+      nextRemaining = seconds;
+      resetBtn.disabled = true;
+      resetBtn.textContent = 'Next (' + nextRemaining + 's)';
+
+      nextTimer = setInterval(function(){
+        nextRemaining -= 1;
+        if (nextRemaining <= 0) {
+          clearInterval(nextTimer);
+          nextTimer = null;
+
+          // Only enable if still rows left
+          if (currentPointer < totalRows - 1) {
+            resetBtn.disabled = false;
+            resetBtn.textContent = 'Next';
+          } else {
+            resetBtn.disabled = true;
+            resetBtn.textContent = 'Next';
+          }
+        } else {
+          resetBtn.textContent = 'Next (' + nextRemaining + 's)';
+        }
+      }, 1000);
+    }
+
+    // Cuando el usuario pulsa Next:
+    function onNextClicked(){
+      // Avanzar el puntero para mostrar la siguiente fila
+      currentPointer += 1;
+
+      if (currentPointer >= totalRows) {
+        // no quedan más filas
+        finalizeAll();
+        return;
+      }
+
+      // Construir la siguiente fila
+      buildPartialSecondRow();
+
+      // Habilitar Solución para nuevo ejercicio
+      enableSolutionButton();
+
+      // Deshabilitar Next 60s salvo que ya no queden filas
+      disableNextForSeconds(60);
+    }
+
+    // ---------------- Finalización ----------------
+    function finalizeAll(){
+      // Cancel timers
+      if (nextTimer) {
+        clearInterval(nextTimer);
+        nextTimer = null;
+      }
+
+      // Disable Next and Solución permanently
+      resetBtn.disabled = true;
+      resolveBtn.disabled = true;
+
+      // Disable any inputs
+      var inputs = document.querySelectorAll('#row2 input.cell-input');
+      for (var i = 0; i < inputs.length; i++) {
+        inputs[i].disabled = true;
+      }
+
+      // Update status
+      statusText.textContent = 'Ejercicios completados. No quedan filas por usar.';
+    }
+
+    // ---------------- Init & setup shuffled order ----------------
+    function prepareShuffledOrder(){
+      shuffledOrder = [];
+      for (var i = 1; i < data.length; i++) shuffledOrder.push(i);
+      shuffleArray(shuffledOrder);
+      totalRows = shuffledOrder.length;
+      currentPointer = 0;
+    }
+
+    function init(){
+      // Preparar orden aleatorio y UI
+      prepareShuffledOrder();
+      buildHeader();
+
+      if (totalRows === 0) {
+        // nothing to do
+        statusText.textContent = 'No hay filas en la tabla origen.';
+        finalizeAll();
+        return;
+      }
+
+      // Mostrar primera fila (pointer = 0)
+      buildPartialSecondRow();
+
+      // Inicializar contadores UI
+      updateCountersUI();
+
+      // Deshabilitar Next 60s al cargar (si hay más filas)
+      disableNextForSeconds(60);
+
+      // Eventos
+      resolveBtn.addEventListener('click', resolveAndShowAnswer);
+      resetBtn.addEventListener('click', onNextClicked);
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

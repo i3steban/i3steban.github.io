@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>El club de las tablas</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #193438;
+      --muted: #52716f;
+      --paper: #f8fbf8;
+      --teal: #087d72;
+      --teal-dark: #075e57;
+      --yellow: #ffd35a;
+      --coral: #f37662;
+      --border: #c9ded6;
+      --white: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#d5eae1 1px, transparent 1px);
+      background-size: 24px 24px;
+      font-family: "Trebuchet MS", "Verdana", sans-serif;
+    }
+
+    button, input { font: inherit; }
+
+    button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    button:focus-visible, input:focus-visible {
+      outline: 3px solid #2648a3;
+      outline-offset: 3px;
+    }
+
+    .app {
+      width: min(100% - 32px, 920px);
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      flex: 0 0 54px;
+      height: 54px;
+      border-radius: 12px;
+      background: var(--yellow);
+      color: var(--ink);
+      font-size: 32px;
+      font-weight: 900;
+      transform: rotate(-6deg);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 260px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .play-area, .sidebar {
+      background: var(--white);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .play-area {
+      padding: 28px;
+      box-shadow: 0 6px 0 #deede5;
+    }
+
+    .section-label {
+      margin: 0 0 14px;
+      color: var(--teal-dark);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    .table-controls {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .table-button, .all-button {
+      min-height: 46px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: #f7fbf8;
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .table-button[aria-pressed="true"] {
+      border-color: var(--teal);
+      background: #d9f3ea;
+      color: var(--teal-dark);
+    }
+
+    .table-button:hover, .all-button:hover {
+      border-color: var(--teal);
+    }
+
+    .all-button {
+      grid-column: 1 / -1;
+      min-height: 42px;
+      background: var(--white);
+      color: var(--teal-dark);
+    }
+
+    .all-button[aria-pressed="true"] {
+      border-color: var(--teal);
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .divider {
+      height: 2px;
+      margin: 26px 0;
+      background: #e6f0eb;
+    }
+
+    .challenge-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .challenge-label span {
+      color: #e5a817;
+      font-size: 21px;
+    }
+
+    .equation {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      min-height: 126px;
+      padding: 16px 0;
+      font-size: 48px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .operator { color: var(--coral); }
+
+    .answer {
+      width: 110px;
+      height: 76px;
+      padding: 4px;
+      border: 3px solid var(--teal);
+      border-radius: 8px;
+      background: #f3fbf7;
+      color: var(--ink);
+      text-align: center;
+      font-size: 42px;
+      font-weight: 900;
+      appearance: textfield;
+    }
+
+    .answer::-webkit-inner-spin-button,
+    .answer::-webkit-outer-spin-button {
+      margin: 0;
+      appearance: none;
+    }
+
+    .answer:disabled {
+      opacity: 1;
+      color: var(--ink);
+    }
+
+    .feedback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      margin: 0 0 12px;
+      padding: 10px;
+      border-radius: 8px;
+      color: var(--muted);
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .feedback.correct {
+      background: #dff5e7;
+      color: #17683c;
+    }
+
+    .feedback.incorrect {
+      background: #fff0e8;
+      color: #994629;
+    }
+
+    .action {
+      width: 100%;
+      min-height: 58px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--teal);
+      box-shadow: 0 4px 0 var(--teal-dark);
+      color: var(--white);
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .action:hover { background: var(--teal-dark); }
+    .action:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--teal-dark); }
+
+    .sidebar { padding: 22px; }
+
+    .sidebar h2 {
+      margin: 0 0 16px;
+      font-size: 20px;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 0;
+      border-top: 2px solid #edf4ef;
+      font-weight: 800;
+    }
+
+    .stat-name {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .stat-icon {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      font-size: 19px;
+      font-weight: 900;
+    }
+
+    .success-icon { background: #dff5e7; color: #207d48; }
+    .error-icon { background: #ffebe5; color: #bd4d38; }
+    .streak-icon { background: #fff2c9; color: #a66a00; }
+
+    .stat-value { font-size: 24px; }
+
+    .reset {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    .reset:hover { border-color: var(--teal); color: var(--teal-dark); }
+
+    @media (max-width: 650px) {
+      .app { padding-top: 20px; }
+      .layout { grid-template-columns: 1fr; }
+      .play-area { padding: 20px; }
+      .sidebar { padding: 20px; }
+      .equation { gap: 8px; font-size: 38px; }
+      .answer { width: 86px; height: 66px; font-size: 36px; }
+    }
+
+    @media (max-width: 340px) {
+      .equation { font-size: 32px; }
+      .answer { width: 70px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div class="brand-mark" aria-hidden="true">×</div>
+      <div>
+        <h1>El club de las tablas</h1>
+        <p class="subtitle">¡Cada cuenta es una aventura!</p>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section class="play-area" aria-labelledby="tables-title">
+        <h2 class="section-label" id="tables-title">Elige tus tablas</h2>
+        <div class="table-controls" id="table-controls" aria-label="Tablas de multiplicar"></div>
+
+        <div class="divider"></div>
+
+        <div class="challenge-label"><span aria-hidden="true">★</span> Tu operación</div>
+        <form id="game-form" novalidate>
+          <div class="equation" aria-label="Operación">
+            <span id="factor-one">1</span>
+            <span class="operator" aria-hidden="true">×</span>
+            <span class="operator" style="position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%);">por</span>
+            <span id="factor-two">1</span>
+            <span class="operator" aria-hidden="true">=</span>
+            <input
+              class="answer"
+              id="answer"
+              type="number"
+              inputmode="numeric"
+              min="0"
+              max="100"
+              step="1"
+              autocomplete="off"
+              aria-label="Tu respuesta"
+              aria-describedby="feedback"
+            >
+          </div>
+          <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+          <button class="action" id="action" type="submit">Comprobar</button>
+        </form>
+      </section>
+
+      <aside class="sidebar" aria-labelledby="score-title">
+        <h2 id="score-title">Tu marcador</h2>
+        <div class="stat">
+          <span class="stat-name"><span class="stat-icon success-icon" aria-hidden="true">✓</span> Aciertos</span>
+          <span class="stat-value" id="correct-count">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-name"><span class="stat-icon error-icon" aria-hidden="true">×</span> Errores</span>
+          <span class="stat-value" id="error-count">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-name"><span class="stat-icon streak-icon" aria-hidden="true">★</span> Racha</span>
+          <span class="stat-value" id="streak-count">0</span>
+        </div>
+        <button class="reset" id="reset" type="button">Reiniciar marcador</button>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    (() => {
+      const tableControls = document.getElementById("table-controls");
+      const factorOne = document.getElementById("factor-one");
+      const factorTwo = document.getElementById("factor-two");
+      const answer = document.getElementById("answer");
+      const feedback = document.getElementById("feedback");
+      const action = document.getElementById("action");
+      const correctCount = document.getElementById("correct-count");
+      const errorCount = document.getElementById("error-count");
+      const streakCount = document.getElementById("streak-count");
+      const selectedTables = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      const tableButtons = [];
+      let current = null;
+      let answered = false;
+      let correct = 0;
+      let errors = 0;
+      let streak = 0;
+
+      function updateTableButtons() {
+        tableButtons.forEach((button, index) => {
+          button.setAttribute("aria-pressed", String(selectedTables.has(index + 1)));
+        });
+        allButton.setAttribute("aria-pressed", String(selectedTables.size === 10));
+      }
+
+      function nextQuestion() {
+        const choices = [];
+        selectedTables.forEach(table => {
+          for (let multiplier = 1; multiplier <= 10; multiplier += 1) {
+            if (!current || table !== current.table || multiplier !== current.multiplier) {
+              choices.push({ table, multiplier });
+            }
+          }
+        });
+
+        current = choices[Math.floor(Math.random() * choices.length)];
+        factorOne.textContent = current.table;
+        factorTwo.textContent = current.multiplier;
+        answer.value = "";
+        answer.disabled = false;
+        feedback.textContent = "";
+        feedback.className = "feedback";
+        action.textContent = "Comprobar";
+        answered = false;
+      }
+
+      for (let table = 1; table <= 10; table += 1) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "table-button";
+        button.textContent = table;
+        button.setAttribute("aria-label", `Tabla del ${table}`);
+        button.addEventListener("click", () => {
+          if (selectedTables.has(table)) {
+            if (selectedTables.size === 1) {
+              feedback.textContent = "Elige al menos una tabla.";
+              feedback.className = "feedback incorrect";
+              return;
+            }
+            selectedTables.delete(table);
+          } else {
+            selectedTables.add(table);
+          }
+          updateTableButtons();
+          nextQuestion();
+        });
+        tableButtons.push(button);
+        tableControls.appendChild(button);
+      }
+
+      const allButton = document.createElement("button");
+      allButton.type = "button";
+      allButton.className = "all-button";
+      allButton.textContent = "Todas mezcladas";
+      allButton.addEventListener("click", () => {
+        for (let table = 1; table <= 10; table += 1) selectedTables.add(table);
+        updateTableButtons();
+        nextQuestion();
+      });
+      tableControls.appendChild(allButton);
+
+      document.getElementById("game-form").addEventListener("submit", event => {
+        event.preventDefault();
+
+        if (answered) {
+          nextQuestion();
+          answer.focus();
+          return;
+        }
+
+        const value = answer.value.trim();
+        if (value === "" || !answer.validity.valid || !Number.isInteger(Number(value))) {
+          feedback.textContent = "Escribe un número entre 0 y 100.";
+          feedback.className = "feedback incorrect";
+          answer.focus();
+          return;
+        }
+
+        const result = current.table * current.multiplier;
+        if (Number(value) === result) {
+          correct += 1;
+          streak += 1;
+          feedback.textContent = streak >= 3
+            ? `¡Genial! Llevas ${streak} aciertos seguidos. ★`
+            : "¡Muy bien! ¡Respuesta correcta! ★";
+          feedback.className = "feedback correct";
+        } else {
+          errors += 1;
+          streak = 0;
+          feedback.textContent = `¡Sigue así! ${current.table} × ${current.multiplier} = ${result}.`;
+          feedback.className = "feedback incorrect";
+        }
+
+        correctCount.textContent = correct;
+        errorCount.textContent = errors;
+        streakCount.textContent = streak;
+        answer.disabled = true;
+        answered = true;
+        action.textContent = "Siguiente operación";
+        action.focus();
+      });
+
+      document.getElementById("reset").addEventListener("click", () => {
+        correct = 0;
+        errors = 0;
+        streak = 0;
+        correctCount.textContent = "0";
+        errorCount.textContent = "0";
+        streakCount.textContent = "0";
+        nextQuestion();
+        feedback.textContent = "Marcador reiniciado.";
+      });
+
+      updateTableButtons();
+      nextQuestion();
+    })();
+  </script>
+</body>
+</html>
