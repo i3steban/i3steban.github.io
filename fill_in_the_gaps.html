@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>English Adventure · Practice the Past</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #203c43;
+      --muted: #547075;
+      --green: #08796d;
+      --green-dark: #055c53;
+      --border: #cadfd8;
+      --yellow: #ffda69;
+      --red: #a53f32;
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(#d6e9e0 1px, transparent 1px) 0 0 / 24px 24px #f5faf7;
+      font-family: "Trebuchet MS", Verdana, sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; touch-action: manipulation; }
+
+    button:focus-visible, input:focus-visible {
+      outline: 3px solid #2959a2;
+      outline-offset: 3px;
+    }
+
+    main {
+      width: min(1120px, 100% - 32px);
+      margin: auto;
+      padding: 28px 0 48px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .illustration { width: 64px; height: 64px; flex-shrink: 0; }
+    h1 { margin: 0; font-size: 28px; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); }
+    h2 { margin: 0 0 10px; font-size: 23px; overflow-wrap: anywhere; }
+    h3 { margin: 0; font-size: 19px; }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 28px;
+      padding: 16px 0;
+      border-block: 2px solid var(--border);
+    }
+
+    .stat { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+    .stat strong { font-size: 24px; }
+    .correct-stat { color: #176b42; }
+    .error-stat { color: var(--red); }
+
+    .progress-area { margin: 22px 0; }
+    .progress-text {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    progress {
+      display: block;
+      width: 100%;
+      height: 14px;
+      border: 0;
+      border-radius: 7px;
+      overflow: hidden;
+      accent-color: var(--green);
+      background: #deece5;
+    }
+
+    progress::-webkit-progress-bar { background: #deece5; }
+    progress::-webkit-progress-value { background: var(--green); }
+    progress::-moz-progress-bar { background: var(--green); }
+
+    .section-header { margin-bottom: 18px; }
+    .theme-label { color: var(--green-dark); font-size: 13px; font-weight: 900; }
+
+    .exercises { display: grid; gap: 12px; }
+
+    .exercise {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 20px;
+      align-items: center;
+      padding: 20px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      background: white;
+    }
+
+    .exercise.correct { border-color: #6fb58c; }
+    .exercise.incorrect { border-color: #df9a8c; }
+
+    .sentence {
+      min-width: 0;
+      font-size: 18px;
+      line-height: 2.8;
+      overflow-wrap: anywhere;
+    }
+
+    .number {
+      margin-right: 8px;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .gap {
+      width: 145px;
+      max-width: 100%;
+      min-height: 46px;
+      margin: 4px;
+      padding: 8px 10px;
+      border: 2px solid #9ebeb4;
+      border-radius: 6px;
+      background: #f5fbf7;
+      color: var(--ink);
+      line-height: 1.3;
+    }
+
+    .gap.long { width: 190px; }
+    .gap.correct { border-color: #26804e; background: #e9f7ed; }
+    .gap.incorrect { border-color: #bf5946; background: #fff0ec; }
+    .gap:disabled { opacity: 1; -webkit-text-fill-color: var(--ink); }
+
+    .solution {
+      min-width: 0;
+      padding-left: 18px;
+      border-left: 2px solid #e4eee8;
+      font-size: 17px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .solution-label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 13px;
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .solution strong { color: var(--green-dark); }
+    .solution.waiting { color: var(--muted); }
+
+    .feedback {
+      min-height: 54px;
+      margin: 18px 0 12px;
+      padding: 12px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 800;
+    }
+
+    .feedback.success { background: #dff3e7; color: #176b42; }
+    .feedback.warning { background: #fff0d3; color: #805117; }
+
+    .actions { display: flex; justify-content: flex-end; }
+
+    .button {
+      min-width: 220px;
+      max-width: 100%;
+      min-height: 56px;
+      padding: 12px 20px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--green);
+      box-shadow: 0 4px 0 var(--green-dark);
+      color: white;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .button:hover { background: var(--green-dark); }
+
+    .final {
+      padding: 36px 0;
+      text-align: center;
+    }
+
+    .medal {
+      display: grid;
+      place-items: center;
+      width: 100px;
+      height: 100px;
+      margin: 0 auto 20px;
+      border: 6px solid #efbd38;
+      border-radius: 50%;
+      background: var(--yellow);
+      color: #71500b;
+      font-size: 56px;
+    }
+
+    .percentage {
+      margin: 18px 0;
+      color: var(--green-dark);
+      font-size: 64px;
+      font-weight: 900;
+    }
+
+    .final p { line-height: 1.6; }
+    .final .button { margin-top: 16px; }
+
+    @media (max-width: 740px) {
+      main { padding-top: 20px; }
+      h1 { font-size: 24px; }
+      .exercise { grid-template-columns: 1fr; gap: 12px; padding: 16px; }
+      .solution { border-left: 0; border-top: 2px solid #e4eee8; padding: 12px 0 0; }
+      .sentence { font-size: 17px; }
+      .actions .button { width: 100%; }
+      .stats { gap: 12px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <svg class="illustration" viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="8" y="7" width="42" height="50" rx="5" fill="#ffda69"/>
+        <rect x="15" y="7" width="35" height="50" rx="4" fill="#fff"/>
+        <path d="M22 21h20M22 30h20M22 39h12" stroke="#08796d" stroke-width="3"/>
+        <path d="M43 49l11-29 6 2-11 29-5 5z" fill="#ef745f"/>
+        <path d="M43 49l6 2-5 5z" fill="#203c43"/>
+      </svg>
+      <div>
+        <h1>English Adventure</h1>
+        <p class="subtitle">A journey into the past!</p>
+      </div>
+    </header>
+
+    <div class="stats" aria-label="Scoreboard">
+      <div class="stat correct-stat">Correct sentences <strong id="correct-count">0</strong></div>
+      <div class="stat error-stat">Incorrect sentences <strong id="error-count">0</strong></div>
+      <div class="stat">Score <strong id="points">0.00 / 10</strong></div>
+    </div>
+
+    <div class="progress-area">
+      <div class="progress-text">
+        <span id="section-progress"></span>
+        <span id="sentence-progress"></span>
+      </div>
+      <progress id="progress" value="0" max="48" aria-label="Completed sentences"></progress>
+    </div>
+
+    <section id="game">
+      <div class="section-header">
+        <p class="theme-label" id="theme-label"></p>
+        <h2 id="theme-title"></h2>
+        <h3 id="section-title"></h3>
+      </div>
+      <form id="exercise-form" novalidate>
+        <div class="exercises" id="exercises"></div>
+        <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+        <div class="actions">
+          <button class="button" id="action" type="submit">Check answers</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="final" id="final" hidden aria-labelledby="final-title">
+      <div class="medal" aria-hidden="true">★</div>
+      <h2 id="final-title" tabindex="-1">Adventure complete!</h2>
+      <div class="percentage" id="percentage"></div>
+      <p id="final-summary"></p>
+      <p id="final-message"></p>
+      <button class="button" id="restart" type="button">Practice again</button>
+    </section>
+  </main>
+
+  <script id="exercise-data" type="application/json">
+  [
+    {
+      "theme": "past_simple",
+      "title": "PAST SIMPLE – FILL IN THE GAPS",
+      "sections": [
+        {
+          "name": "A. Affirmative",
+          "items": [
+            { "sentence": "Yesterday I [gap] (visit) my grandmother.", "answer": "visited" },
+            { "sentence": "Last weekend we [gap] (go) to the cinema.", "answer": "went" },
+            { "sentence": "She [gap] (play) tennis on Saturday morning.", "answer": "played" },
+            { "sentence": "They [gap] (eat) pizza at the party.", "answer": "ate" },
+            { "sentence": "My brother [gap] (study) for the exam last night.", "answer": "studied" },
+            { "sentence": "I [gap] (see) a big dog in the park.", "answer": "saw" }
+          ]
+        },
+        {
+          "name": "B. Negative",
+          "items": [
+            { "sentence": "I [gap] (like) the film last night.", "answer": "didn't,like" },
+            { "sentence": "She [gap] (go) to school yesterday.", "answer": "didn't,go" },
+            { "sentence": "We [gap] (have) breakfast this morning.", "answer": "didn't,have" },
+            { "sentence": "He [gap] (watch) TV after dinner.", "answer": "didn't,watch" },
+            { "sentence": "They [gap] (buy) a new car last year.", "answer": "didn't,buy" },
+            { "sentence": "My sister [gap] (do) her homework.", "answer": "didn't,do" }
+          ]
+        },
+        {
+          "name": "C. Questions",
+          "items": [
+            { "sentence": "[gap] you [gap] (visit) your cousins last summer?", "answer": "Did,visit" },
+            { "sentence": "[gap] she [gap] (eat) all the cake?", "answer": "Did,eat" },
+            { "sentence": "[gap] they [gap] (play) football on Sunday?", "answer": "Did,play" },
+            { "sentence": "[gap] he [gap] (go) to the beach?", "answer": "Did,go" },
+            { "sentence": "[gap] you [gap] (see) that film?", "answer": "Did,see" },
+            { "sentence": "[gap] your friends [gap] (come) to the party?", "answer": "Did,come" }
+          ]
+        },
+        {
+          "name": "D. Short answers",
+          "items": [
+            { "sentence": "Did you go to the park? ✔ Yes, I [gap].", "answer": "did" },
+            { "sentence": "Did she eat the sandwich? ✘ No, she [gap].", "answer": "didn't" },
+            { "sentence": "Did they play basketball? ✔ Yes, they [gap].", "answer": "did" },
+            { "sentence": "Did he buy a present? ✘ No, he [gap].", "answer": "didn't" },
+            { "sentence": "Did you see the rainbow? ✔ Yes, I [gap].", "answer": "did" },
+            { "sentence": "Did your brother do his homework? ✘ No, he [gap].", "answer": "didn't" }
+          ]
+        }
+      ]
+    },
+    {
+      "theme": "past_continuous",
+      "title": "PAST CONTINUOUS – FILL IN THE GAPS",
+      "sections": [
+        {
+          "name": "A. Affirmative",
+          "items": [
+            { "sentence": "At 8 o'clock I [gap] (have) breakfast.", "answer": "was,having" },
+            { "sentence": "Yesterday at 5 p.m. they [gap] (play) football.", "answer": "were,playing" },
+            { "sentence": "She [gap] (read) a book when I called her.", "answer": "was,reading" },
+            { "sentence": "We [gap] (watch) TV after dinner.", "answer": "were,watching" },
+            { "sentence": "My dad [gap] (cook) dinner at 9 o'clock.", "answer": "was,cooking" },
+            { "sentence": "The children [gap] (run) in the park.", "answer": "were,running" }
+          ]
+        },
+        {
+          "name": "B. Negative",
+          "items": [
+            { "sentence": "I [gap] (sleep) at 10 o'clock.", "answer": "wasn't,sleeping" },
+            { "sentence": "They [gap] (listen) to music.", "answer": "weren't,listening" },
+            { "sentence": "She [gap] (study) in her bedroom.", "answer": "wasn't,studying" },
+            { "sentence": "We [gap] (swim) in the pool.", "answer": "weren't,swimming" },
+            { "sentence": "He [gap] (write) an email.", "answer": "wasn't,writing" },
+            { "sentence": "You [gap] (pay) attention in class.", "answer": "weren't,paying" }
+          ]
+        },
+        {
+          "name": "C. Questions",
+          "items": [
+            { "sentence": "[gap] you [gap] (watch) TV at 7 o'clock?", "answer": "Were,watching" },
+            { "sentence": "[gap] she [gap] (dance) at the party?", "answer": "Was,dancing" },
+            { "sentence": "[gap] they [gap] (play) tennis yesterday afternoon?", "answer": "Were,playing" },
+            { "sentence": "[gap] he [gap] (do) his homework?", "answer": "Was,doing" },
+            { "sentence": "[gap] we [gap] (make) too much noise?", "answer": "Were,making" },
+            { "sentence": "[gap] it [gap] (rain) when you left?", "answer": "Was,raining" }
+          ]
+        },
+        {
+          "name": "D. Short answers",
+          "items": [
+            { "sentence": "Were you sleeping at midnight? ✔ Yes, I [gap].", "answer": "was" },
+            { "sentence": "Was she singing in the choir? ✘ No, she [gap].", "answer": "wasn't" },
+            { "sentence": "Were they playing chess? ✔ Yes, they [gap].", "answer": "were" },
+            { "sentence": "Was he working in the garden? ✘ No, he [gap].", "answer": "wasn't" },
+            { "sentence": "Were we waiting for the bus? ✔ Yes, we [gap].", "answer": "were" },
+            { "sentence": "Was it snowing yesterday? ✘ No, it [gap].", "answer": "wasn't" }
+          ]
+        }
+      ]
+    }
+  ]
+  </script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const byId = id => document.getElementById(id);
+      const data = JSON.parse(byId("exercise-data").textContent);
+      const sections = data.flatMap((theme, themeIndex) =>
+        theme.sections.map(section => ({ ...section, theme, themeIndex }))
+      );
+      const total = sections.reduce((sum, section) => sum + section.items.length, 0);
+      const container = byId("exercises");
+      const feedback = byId("feedback");
+      const action = byId("action");
+
+      let sectionIndex = 0;
+      let correct = 0;
+      let errors = 0;
+      let checked = false;
+      let rows = [];
+
+      function normalize(value) {
+        return value.toLowerCase().replace(/[\s'’‘ʼ＇`´]/gu, "");
+      }
+
+      function expectedAnswers(item) {
+        const gapCount = item.sentence.split("[gap]").length - 1;
+        const parts = item.answer.split(",").map(part => part.trim());
+        const answers = gapCount === 1 ? [parts.join(" ")] : parts;
+
+        if (answers.length !== gapCount) {
+          throw new Error("The number of answers does not match the number of gaps.");
+        }
+
+        return answers;
+      }
+
+      function formatExamScore() {
+        return (total === 0 ? 0 : correct / total * 10).toFixed(2);
+      }
+
+      function updateScore() {
+        byId("correct-count").textContent = correct;
+        byId("error-count").textContent = errors;
+        byId("points").textContent = `${formatExamScore()} / 10`;
+        byId("sentence-progress").textContent = `${correct + errors} of ${total} sentences`;
+        byId("progress").max = total;
+        byId("progress").value = correct + errors;
+      }
+
+      function renderSection(focusFirst = false) {
+        const section = sections[sectionIndex];
+        checked = false;
+        rows = [];
+        container.replaceChildren();
+        feedback.textContent = "";
+        feedback.className = "feedback";
+        action.textContent = "Check answers";
+        byId("theme-label").textContent = `Topic ${section.themeIndex + 1} of ${data.length}`;
+        byId("theme-title").textContent = section.theme.title;
+        byId("section-title").textContent = section.name;
+        byId("section-progress").textContent = `Section ${sectionIndex + 1} of ${sections.length}`;
+
+        section.items.forEach((item, itemIndex) => {
+          const answers = expectedAnswers(item);
+          const article = document.createElement("article");
+          article.className = "exercise";
+          article.setAttribute("aria-label", `Sentence ${itemIndex + 1}`);
+
+          const sentence = document.createElement("div");
+          sentence.className = "sentence";
+          sentence.lang = "en";
+
+          const number = document.createElement("span");
+          number.className = "number";
+          number.textContent = `${itemIndex + 1}.`;
+          sentence.append(number);
+
+          const inputs = [];
+          const pieces = item.sentence.split("[gap]");
+          pieces.forEach((piece, gapIndex) => {
+            sentence.append(document.createTextNode(piece));
+            if (gapIndex >= answers.length) return;
+
+            const input = document.createElement("input");
+            input.type = "text";
+            input.className = answers[gapIndex].includes(" ") ? "gap long" : "gap";
+            input.autocomplete = "off";
+            input.spellcheck = false;
+            input.setAttribute("autocapitalize", "off");
+            input.setAttribute("aria-label", `Sentence ${itemIndex + 1}, gap ${gapIndex + 1}`);
+            inputs.push(input);
+            sentence.append(input);
+          });
+
+          const solution = document.createElement("div");
+          solution.className = "solution waiting";
+          solution.id = `solution-${sectionIndex}-${itemIndex}`;
+          solution.textContent = "…";
+
+          inputs.forEach(input => input.setAttribute("aria-describedby", solution.id));
+          article.append(sentence, solution);
+          container.append(article);
+          rows.push({ article, inputs, solution, answers, item });
+        });
+
+        updateScore();
+        if (focusFirst) rows[0]?.inputs[0]?.focus();
+      }
+
+      function showSolution(row, isCorrect) {
+        row.solution.replaceChildren();
+        row.solution.className = "solution";
+
+        const label = document.createElement("span");
+        label.className = "solution-label";
+        label.textContent = isCorrect ? "✓ Correct!" : "✗ Correct answer";
+        row.solution.append(label);
+
+        const fullSentence = document.createElement("span");
+        fullSentence.lang = "en";
+        const pieces = row.item.sentence.replace(/\s*\([^)]*\)/g, "").split("[gap]");
+
+        pieces.forEach((piece, gapIndex) => {
+          fullSentence.append(document.createTextNode(piece));
+          if (gapIndex >= row.answers.length) return;
+          const answer = document.createElement("strong");
+          answer.textContent = row.answers[gapIndex];
+          fullSentence.append(answer);
+        });
+
+        row.solution.append(fullSentence);
+      }
+
+      function checkSection() {
+        const empty = rows.flatMap(row => row.inputs)
+          .find(input => normalize(input.value) === "");
+
+        if (empty) {
+          feedback.textContent = "Some gaps are still empty! Fill in all your answers.";
+          feedback.className = "feedback warning";
+          empty.focus();
+          return;
+        }
+
+        let sectionCorrect = 0;
+        rows.forEach(row => {
+          const matches = row.inputs.map((input, index) =>
+            normalize(input.value) === normalize(row.answers[index])
+          );
+          const isCorrect = matches.every(Boolean);
+
+          row.inputs.forEach((input, index) => {
+            input.classList.add(matches[index] ? "correct" : "incorrect");
+            input.setAttribute("aria-invalid", String(!matches[index]));
+            input.disabled = true;
+          });
+
+          row.article.classList.add(isCorrect ? "correct" : "incorrect");
+          showSolution(row, isCorrect);
+
+          if (isCorrect) {
+            correct += 1;
+            sectionCorrect += 1;
+          } else {
+            errors += 1;
+          }
+        });
+
+        checked = true;
+        updateScore();
+        feedback.className = sectionCorrect === rows.length
+          ? "feedback success"
+          : "feedback warning";
+        feedback.textContent = sectionCorrect === rows.length
+          ? "★ Fantastic! All your sentences are correct."
+          : `Good effort! ${sectionCorrect} of ${rows.length} sentences correct. Keep going!`;
+        action.textContent = sectionIndex === sections.length - 1
+          ? "See final results"
+          : "Next section";
+        action.focus();
+      }
+
+      function finish() {
+        const percentage = total === 0 ? 0 : correct / total * 100;
+        byId("game").hidden = true;
+        byId("final").hidden = false;
+        byId("section-progress").textContent = "All sections completed";
+        byId("percentage").textContent =
+          `${percentage.toLocaleString("en-GB", { maximumFractionDigits: 1 })}%`;
+        byId("final-summary").textContent =
+          `${correct} correct sentences and ${errors} incorrect out of ${total}. Your score is ${formatExamScore()} / 10.`;
+        byId("final-message").textContent = percentage === 100
+          ? "Amazing! You completed the journey with every answer correct."
+          : percentage >= 70
+            ? "Great work! Every exercise helps you improve."
+            : "You finished the adventure! Keep practising: you can improve on your next try.";
+        byId("final-title").focus();
+      }
+
+      byId("exercise-form").addEventListener("submit", event => {
+        event.preventDefault();
+
+        if (!checked) {
+          checkSection();
+        } else if (sectionIndex + 1 < sections.length) {
+          sectionIndex += 1;
+          renderSection(true);
+          window.scrollTo(0, 0);
+        } else {
+          finish();
+        }
+      });
+
+      byId("restart").addEventListener("click", () => {
+        sectionIndex = 0;
+        correct = 0;
+        errors = 0;
+        byId("final").hidden = true;
+        byId("game").hidden = false;
+        renderSection(true);
+      });
+
+      renderSection();
+    })();
+  </script>
+</body>
+</html>
